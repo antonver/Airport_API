@@ -33,7 +33,6 @@ class FlightViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-
 class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.all()
 

@@ -1,5 +1,8 @@
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
+
 from .models import Flight, Route, Airport, Crew, Ticket, Order, Airplane, AirplaneType
 
 #airport serializers
@@ -85,11 +88,23 @@ class CrewSerializer(serializers.ModelSerializer):
         model = Crew
         fields = '__all__'
 
+
 #ticket serializers
 class TicketSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        Ticket.validate_tickets(
+            attrs["seat"],
+            attrs["row"],
+            attrs["flight"].airplane.seats_in_row,
+            attrs["flight"].airplane.rows,
+            serializers.ValidationError)
+        return data
+
     class Meta:
         model = Ticket
         fields = '__all__'
+
 
 
 class TicketListSerializer(serializers.ModelSerializer):
@@ -118,6 +133,7 @@ class UserOrderSerializer(serializers.ModelSerializer):
 #order serializers
 class OrderRetrieveSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    tickets = TicketListSerializer(read_only=True, many=True)
 
     class Meta:
         model = Order
@@ -126,6 +142,7 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
 
 class OrderListSerializer(serializers.ModelSerializer):
     user = UserOrderSerializer(read_only=True)
+    tickets = TicketListSerializer(read_only=True, many=True)
 
     class Meta:
         model = Order
@@ -133,9 +150,18 @@ class OrderListSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    tickets = TicketListSerializer(read_only=False, many=True, allow_empty=False)
     class Meta:
         model = Order
         fields = '__all__'
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            tickets_data = validated_data.pop("tickets")
+            order = Order.objects.create(**validated_data)
+            for ticket_data in tickets_data:
+                Ticket.objects.create(order=order, **ticket_data)
+            return order
 
 
 #airplane serializers

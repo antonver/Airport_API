@@ -3,7 +3,8 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from .models import Flight, Route, Airport, Crew, Ticket, Order, Airplane, AirplaneType
+from .models import Flight, Route, Airport, Crew, Ticket, Order, Airplane, AirplaneType, User
+
 
 #airport serializers
 class AirportRouteSerializer(serializers.ModelSerializer):
@@ -106,10 +107,9 @@ class TicketSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
 class TicketListSerializer(serializers.ModelSerializer):
     flight = serializers.CharField(source="flight.code")
-    person_who_ordered = serializers.CharField(source="order.user.username")
+    person_who_ordered = serializers.StringRelatedField(source="order.user")
 
     class Meta:
         model = Ticket
@@ -149,8 +149,10 @@ class OrderListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
 class OrderSerializer(serializers.ModelSerializer):
     tickets = TicketListSerializer(read_only=False, many=True, allow_empty=False)
+
     class Meta:
         model = Order
         fields = '__all__'
@@ -170,8 +172,28 @@ class AirplaneSerializer(serializers.ModelSerializer):
         model = Airplane
         fields = '__all__'
 
-#
+
 class AirplaneTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AirplaneType
         fields = '__all__'
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+
+    def create(self, validated_data):
+        user = User(**validated_data)
+        user.set_password(validated_data['password'])  # Hash the password
+        user.save()
+        return user
+
+# {
+#     "username": "new_user",
+#     "email": "new_user@example.com",
+#     "password": "securepassword"
+# }

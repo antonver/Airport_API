@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import UniqueConstraint
 from rest_framework.exceptions import ValidationError
+from django.contrib.auth.models import AbstractUser
 
 from airpot_api import settings
 
@@ -17,21 +18,33 @@ class Flight(models.Model):
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
 
+    def __str__(self):
+        return self.code
+
 
 class Route(models.Model):
     source = models.ForeignKey("Airport", on_delete=models.CASCADE, related_name="routes_from")
     destination = models.ForeignKey("Airport", on_delete=models.CASCADE, related_name="routes_to")
     distance = models.IntegerField()
 
+    def __str__(self):
+        return f"{self.source} -> {self.destination}"
+
 
 class Airport(models.Model):
     name = models.CharField(max_length=255)
     closest_big_city = models.CharField(max_length=255)
 
+    def __str__(self):
+        return f"Closest big city: {self.closest_big_city}; Airport: {self.name}"
+
 
 class Crew(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 class Ticket(models.Model):
@@ -66,10 +79,16 @@ class Ticket(models.Model):
         super().full_clean()
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f"Flight code: {self.flight.code}; Seat:{self.seat}; Row:{self.row};"
+
 
 class Order(models.Model):
     created_at = models.DateTimeField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Flight code: {self.created_at}; User:{self.user};"
 
 
 class Airplane(models.Model):
@@ -78,11 +97,16 @@ class Airplane(models.Model):
     seats_in_row = models.IntegerField()
     airplane_type = models.ForeignKey("AirplaneType", on_delete=models.CASCADE, related_name="airplanes")
 
+    def __str__(self):
+        return f"{self.name}"
+
 
 class AirplaneType(models.Model):
     name = models.CharField(max_length=255)
 
+    def __str__(self):
+        return f"{self.name}"
+
 
 class User(AbstractUser):
-    def __str__(self):
-        return self.username
+    pass

@@ -16,7 +16,6 @@ class AirportViewSetTests(APITestCase):
         self.airport_1_data = {"name": "JFK", "closest_big_city": "New York"}
         self.airport_2_data = {"name": "LAX", "closest_big_city": "Los Angeles"}
 
-        # Create initial data
         self.airport_1 = Airport.objects.create(**self.airport_1_data)
         self.airport_2 = Airport.objects.create(**self.airport_2_data)
         self.client = APIClient()
@@ -24,7 +23,6 @@ class AirportViewSetTests(APITestCase):
         token = RefreshToken.for_user(self.user).access_token
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
-        # URL for the endpoint
         self.url_list = reverse("airport:airport-list")
         self.url_detail = reverse("airport:airport-detail", args=[self.airport_1.id])
 

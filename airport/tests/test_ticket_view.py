@@ -87,9 +87,7 @@ class TicketViewSetTests(APITestCase):
         )
 
     def setUp(self):
-        """
-        Set up the client authentication for each test.
-        """
+
         token = RefreshToken.for_user(self.user).access_token
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
@@ -101,9 +99,7 @@ class TicketViewSetTests(APITestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_ticket_creation(self):
-        """
-        Test creating a ticket via POST.
-        """
+
         url = reverse("airport:ticket-list")
         payload = {
             "row": 14,

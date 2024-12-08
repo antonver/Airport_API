@@ -1,7 +1,6 @@
 import string
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import UniqueConstraint
 from rest_framework.exceptions import ValidationError
@@ -28,7 +27,7 @@ class Route(models.Model):
     distance = models.IntegerField()
 
     def __str__(self):
-        return f"{self.source} -> {self.destination}"
+        return f"Distance: {self.id};"
 
 
 class Airport(models.Model):
@@ -88,7 +87,8 @@ class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Flight code: {self.created_at}; User:{self.user};"
+        formatted_date = self.created_at.strftime('%Y-%m-%d %H:%M:%S')  # Format the date-time
+        return f"Created at {formatted_date}"
 
 
 class Airplane(models.Model):
@@ -106,7 +106,3 @@ class AirplaneType(models.Model):
 
     def __str__(self):
         return f"{self.name}"
-
-
-class User(AbstractUser):
-    pass

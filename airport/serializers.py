@@ -3,7 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from .models import Flight, Route, Airport, Crew, Ticket, Order, Airplane, AirplaneType, User
+from .models import Flight, Route, Airport, Crew, Ticket, Order, Airplane, AirplaneType
 
 
 #airport serializers
@@ -21,8 +21,8 @@ class AirportSerializer(serializers.ModelSerializer):
 
 #Rout serializers
 class RouteListSerializer(serializers.ModelSerializer):
-    source = AirportRouteSerializer(read_only=True)
-    destination = AirportRouteSerializer(read_only=True)
+    source = serializers.CharField(source="source.name", read_only=True)
+    destination = serializers.CharField(source="destination.name", read_only=True)
 
     class Meta:
         model = Route
@@ -46,7 +46,9 @@ class RouteSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+
 #airplane serializers
+
 
 
 #flight serializers
@@ -64,6 +66,8 @@ class FlightRetrieveSerializer(serializers.ModelSerializer):
     available_seats = serializers.IntegerField(read_only=True)
     taken_seats = serializers.IntegerField(read_only=True)
     route = RouteRetrieveSerializer(read_only=True)
+    arrival_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    departure_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
 
     class Meta:
         model = Flight
@@ -71,6 +75,15 @@ class FlightRetrieveSerializer(serializers.ModelSerializer):
 
 
 class FlightSerializer(serializers.ModelSerializer):
+    route = serializers.PrimaryKeyRelatedField(many=False, queryset=Route.objects.all().select_related())
+    arrival_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    departure_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+
+    def validate(self, attrs):
+        if attrs["departure_time"] >= attrs["arrival_time"]:
+            raise serializers.ValidationError("The departure date must be before the arrival date")
+        return attrs
+
     class Meta:
         model = Flight
         fields = "__all__"
@@ -91,21 +104,6 @@ class CrewSerializer(serializers.ModelSerializer):
 
 
 #ticket serializers
-class TicketSerializer(serializers.ModelSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        Ticket.validate_tickets(
-            attrs["seat"],
-            attrs["row"],
-            attrs["flight"].airplane.seats_in_row,
-            attrs["flight"].airplane.rows,
-            serializers.ValidationError)
-        return data
-
-    class Meta:
-        model = Ticket
-        fields = '__all__'
-
 
 class TicketListSerializer(serializers.ModelSerializer):
     flight = serializers.CharField(source="flight.code")
@@ -179,21 +177,4 @@ class AirplaneTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
 
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'password']
-
-    def create(self, validated_data):
-        user = User(**validated_data)
-        user.set_password(validated_data['password'])  # Hash the password
-        user.save()
-        return user
-
-# {
-#     "username": "new_user",
-#     "email": "new_user@example.com",
-#     "password": "securepassword"
-# }

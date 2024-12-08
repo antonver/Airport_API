@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -19,10 +20,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-t$#!*a$e!!zjyosyg26p_*6t!gg&i3$sbb415ska8jpl3&qb90'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'your-default-key')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
 
@@ -40,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'debug_toolbar',
     "drf_spectacular",
+    "user",
 ]
 
 MIDDLEWARE = [
@@ -145,7 +148,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-AUTH_USER_MODEL = 'airport.User'
+AUTH_USER_MODEL = 'user.User'
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=7),

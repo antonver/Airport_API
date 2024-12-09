@@ -7,7 +7,11 @@ from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from airport.models import Airport, Route, AirplaneType, Airplane, Flight
-from airport.serializers import FlightListSerializer, FlightSerializer, FlightRetrieveSerializer
+from airport.serializers import (
+    FlightListSerializer,
+    FlightSerializer,
+    FlightRetrieveSerializer,
+)
 
 
 class FlightViewIsNotAuthenticatedTest(APITestCase):
@@ -20,12 +24,12 @@ class FlightViewIsNotAuthenticatedTest(APITestCase):
         self.assertEqual(res.status_code, 401)
 
 
-
-
 class FlightViewIsAuthenticatedTest(APITestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = get_user_model().objects.create_user("test@gmail.com", "123456admin")
+        self.user = get_user_model().objects.create_user(
+            "test@gmail.com", "123456admin"
+        )
         token = RefreshToken.for_user(self.user).access_token
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
@@ -33,7 +37,9 @@ class FlightViewIsAuthenticatedTest(APITestCase):
     def setUpTestData(cls):
 
         cls.airport1 = Airport.objects.create(name="JFK", closest_big_city="New York")
-        cls.airport2 = Airport.objects.create(name="LAX", closest_big_city="Los Angeles")
+        cls.airport2 = Airport.objects.create(
+            name="LAX", closest_big_city="Los Angeles"
+        )
 
         cls.route = Route.objects.create(
             source=cls.airport1,
@@ -87,7 +93,12 @@ class FlightViewIsAuthenticatedTest(APITestCase):
         self.assertEqual(res.data["results"], serializer.data)
 
     def test_retrieve_flight_by_id(self):
-        url = reverse("airport:flight-detail", args=[1,])
+        url = reverse(
+            "airport:flight-detail",
+            args=[
+                1,
+            ],
+        )
         res = self.client.get(url)
         flight = Flight.objects.get(id=1)
         serializer = FlightRetrieveSerializer(flight)
@@ -97,11 +108,11 @@ class FlightViewIsAuthenticatedTest(APITestCase):
 
     def test_create_correct_date_flight(self):
         payload = {
-            "code":"FL5699",
-            "route":1,
-            "airplane":1,
+            "code": "FL5699",
+            "route": 1,
+            "airplane": 1,
             "departure_time": "2024-11-25T16:20:15",
-            "arrival_time": "2024-12-25T16:20:15"
+            "arrival_time": "2024-12-25T16:20:15",
         }
         url = reverse("airport:flight-list")
         res = self.client.post(url, payload)
@@ -113,19 +124,24 @@ class FlightViewIsAuthenticatedTest(APITestCase):
                 self.assertEqual(payload[key], flight.route.id)
             elif key == "airplane":
                 self.assertEqual(payload[key], flight.airplane.id)
-            elif key in ["departure_time", "arrival_time"]:  # Handle datetime comparison with tzinfo
-                expected_datetime = datetime.fromisoformat(payload[key]).replace(tzinfo=timezone.utc)
+            elif key in [
+                "departure_time",
+                "arrival_time",
+            ]:  # Handle datetime comparison with tzinfo
+                expected_datetime = datetime.fromisoformat(payload[key]).replace(
+                    tzinfo=timezone.utc
+                )
                 self.assertEqual(expected_datetime, getattr(flight, key))
             else:
                 self.assertEqual(payload[key], getattr(flight, key))
 
     def test_create_incorrect_date_flight(self):
         payload = {
-            "code":"FL5699",
-            "route":1,
-            "airplane":1,
+            "code": "FL5699",
+            "route": 1,
+            "airplane": 1,
             "departure_time": "2024-11-25T16:20:15",
-            "arrival_time": "2024-10-25T16:20:15"
+            "arrival_time": "2024-10-25T16:20:15",
         }
         url = reverse("airport:flight-list")
         res = self.client.post(url, payload)

@@ -18,8 +18,12 @@ class OrderViewSetTests(APITestCase):
         cls.user_2 = get_user_model().objects.create_user(
             email="user2@example.com", password="securepassword", is_staff=True
         )
-        cls.order_1 = Order.objects.create(user=cls.user_1, created_at=datetime.now(tz=timezone.utc))
-        cls.order_2 = Order.objects.create(user=cls.user_2, created_at=datetime.now(tz=timezone.utc))
+        cls.order_1 = Order.objects.create(
+            user=cls.user_1, created_at=datetime.now(tz=timezone.utc)
+        )
+        cls.order_2 = Order.objects.create(
+            user=cls.user_2, created_at=datetime.now(tz=timezone.utc)
+        )
 
         cls.order_list_url = reverse("airport:order-list")
         cls.order_detail_user_1 = reverse("airport:order-detail", args=[cls.order_1.id])
@@ -36,7 +40,6 @@ class OrderViewSetTests(APITestCase):
         response = self.client.get(self.order_list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
-
 
     def test_staff_can_access_all_orders(self):
         self.client.force_authenticate(user=self.user_2)

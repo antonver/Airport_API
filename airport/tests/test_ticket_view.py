@@ -20,7 +20,9 @@ class TicketViewSetTests(APITestCase):
 
         # Create airports
         cls.airport1 = Airport.objects.create(name="JFK", closest_big_city="New York")
-        cls.airport2 = Airport.objects.create(name="LAX", closest_big_city="Los Angeles")
+        cls.airport2 = Airport.objects.create(
+            name="LAX", closest_big_city="Los Angeles"
+        )
 
         # Create a route
         cls.route = Route.objects.create(
@@ -51,13 +53,11 @@ class TicketViewSetTests(APITestCase):
 
         # Create orders
         cls.order = Order.objects.create(
-            user=cls.user,
-            created_at=datetime.now(tz=timezone.utc)
+            user=cls.user, created_at=datetime.now(tz=timezone.utc)
         )
 
         cls.order2 = Order.objects.create(
-            user=cls.user2,
-            created_at=datetime.now(tz=timezone.utc)
+            user=cls.user2, created_at=datetime.now(tz=timezone.utc)
         )
 
         # Create tickets

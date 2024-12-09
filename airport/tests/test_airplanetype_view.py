@@ -20,7 +20,9 @@ class AirplaneTypeViewSetTests(APITestCase):
         cls.airplane_type_1 = AirplaneType.objects.create(name="Boeing 747")
         cls.airplane_type_2 = AirplaneType.objects.create(name="Airbus A320")
         cls.airplane_type_list_url = reverse("airport:airplanetype-list")
-        cls.airplane_type_detail_url = lambda pk: reverse("airport:airplanetype-detail", args=[pk])
+        cls.airplane_type_detail_url = lambda pk: reverse(
+            "airport:airplanetype-detail", args=[pk]
+        )
 
     def test_get_airplane_type_list(self):
         response = self.client.get(self.airplane_type_list_url)
@@ -28,7 +30,9 @@ class AirplaneTypeViewSetTests(APITestCase):
         self.assertEqual(len(response.data["results"]), 2)
 
     def test_get_single_airplane_type(self):
-        response = self.client.get(self.airplane_type_detail_url(self.airplane_type_1.id))
+        response = self.client.get(
+            self.airplane_type_detail_url(self.airplane_type_1.id)
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["name"], "Boeing 747")
 

@@ -23,16 +23,25 @@ class RouteViewSetTests(APITestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = get_user_model().objects.create_user("test@gmail.com", "123456admin")
+        self.user = get_user_model().objects.create_user(
+            "test@gmail.com", "123456admin"
+        )
         token = RefreshToken.for_user(self.user).access_token
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+
     @classmethod
     def setUpTestData(cls):
 
         # Create airports and routes
-        cls.airport1 = Airport.objects.create(name="Airport A", closest_big_city="City A")
-        cls.airport2 = Airport.objects.create(name="Airport B", closest_big_city="City B")
-        cls.airport3 = Airport.objects.create(name="Airport C", closest_big_city="City C")
+        cls.airport1 = Airport.objects.create(
+            name="Airport A", closest_big_city="City A"
+        )
+        cls.airport2 = Airport.objects.create(
+            name="Airport B", closest_big_city="City B"
+        )
+        cls.airport3 = Airport.objects.create(
+            name="Airport C", closest_big_city="City C"
+        )
 
         cls.route_1 = Route.objects.create(
             source=cls.airport1,

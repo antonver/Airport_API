@@ -14,9 +14,12 @@ class CrewViewSetTests(APITestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = get_user_model().objects.create_user("test@gmail.com", "123456admin")
+        self.user = get_user_model().objects.create_user(
+            "test@gmail.com", "123456admin"
+        )
         token = RefreshToken.for_user(self.user).access_token
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+
     @classmethod
     def setUpTestData(cls):
         cls.crew_1 = Crew.objects.create(first_name="John", last_name="Doe")

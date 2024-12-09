@@ -26,17 +26,19 @@ class AirplaneViewSetTests(APITestCase):
             name="Airplane 1",
             rows=20,
             seats_in_row=6,
-            airplane_type=cls.airplane_type_1
+            airplane_type=cls.airplane_type_1,
         )
         cls.airplane_2 = Airplane.objects.create(
             name="Airplane 2",
             rows=25,
             seats_in_row=8,
-            airplane_type=cls.airplane_type_2
+            airplane_type=cls.airplane_type_2,
         )
 
         cls.airplane_list_url = reverse("airport:airplane-list")
-        cls.airplane_detail_url = lambda pk: reverse("airport:airplane-detail", args=[pk])
+        cls.airplane_detail_url = lambda pk: reverse(
+            "airport:airplane-detail", args=[pk]
+        )
 
     def test_get_airplane_list(self):
         response = self.client.get(self.airplane_list_url)
@@ -54,7 +56,7 @@ class AirplaneViewSetTests(APITestCase):
             "name": "Airplane 3",
             "rows": 30,
             "seats_in_row": 10,
-            "airplane_type": self.airplane_type_1.id
+            "airplane_type": self.airplane_type_1.id,
         }
         response = self.client.post(self.airplane_list_url, payload, format="json")
         self.assertEqual(response.status_code, 201)

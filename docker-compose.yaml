@@ -3,7 +3,7 @@ services:
     build:
       context: .
     env_file:
-      - .env
+      - example.env
     volumes:
       - ./:/app
     ports:
